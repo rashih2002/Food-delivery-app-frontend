@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Order Successful – FoodGo</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+  .iphone {
+    width: 390px;
+    height: 844px;
+    border-radius: 40px;
+    overflow: hidden;
+    border: 2px solid black;
+    background: #fafafa;
+    position: relative;
+  }
+
+  /* Accessibility Modes */
+  .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+
+  .iphone.high-contrast { background:#000 !important; color:#fff !important; }
+  .iphone.high-contrast * { color:#fff !important; background-color:transparent !important; }
+
+  .iphone.large-text { font-size:1.1rem; }
+  .iphone.large-text * { font-size:inherit; }
+
+  .iphone.dyslexia-mode { font-family:system-ui,sans-serif; letter-spacing:0.03em; line-height:1.4; }
+
+  /* Confetti */
+  .confetti {
+    position: absolute;
+    top: -10px;
+    width: 9px;
+    height: 14px;
+    opacity: 0.85;
+    animation: fall 1.8s linear forwards;
+  }
+
+  @keyframes fall {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(920px) rotate(360deg); }
+  }
+</style>
+</head>
+
+<body class="bg-gray-900 flex justify-center items-center h-screen">
+
+<div class="iphone" role="application" aria-label="Order success screen">
+
+  <div id="announce" class="sr-only" aria-live="polite"></div>
+
+  <!-- HEADER -->
+  <header class="absolute top-0 left-0 w-full z-20 bg-white/30 backdrop-blur-xl p-5 flex justify-between items-center">
+    <button onclick="window.location.href='index.html'"
+      class="w-10 h-10 bg-white rounded-full shadow flex items-center justify-center focus-visible:ring-2 ring-red-500"
+      aria-label="Back to home">
+      <span class="material-icons text-gray-700">home</span>
+    </button>
+
+    <h1 class="text-lg font-bold">Success</h1>
+
+    <!-- Accessibility -->
+    <button id="accBtn"
+      class="w-10 h-10 bg-white rounded-full shadow flex items-center justify-center"
+      aria-expanded="false"
+      aria-label="Accessibility settings">
+      <span class="material-icons text-gray-700">accessibility_new</span>
+    </button>
+  </header>
+
+  <!-- Accessibility Panel -->
+  <section id="accPanel"
+    class="absolute top-20 right-5 bg-white w-48 rounded-xl shadow-xl p-3 text-xs hidden z-40">
+    <p class="font-semibold mb-2">Accessibility</p>
+    <label class="flex items-center gap-2 mb-1"><input type="checkbox" id="toggleHC"> High contrast</label>
+    <label class="flex items-center gap-2 mb-1"><input type="checkbox" id="toggleLT"> Larger text</label>
+    <label class="flex items-center gap-2"><input type="checkbox" id="toggleDX"> Dyslexia-friendly</label>
+  </section>
+
+  <!-- SUCCESS CARD -->
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+              bg-white w-80 rounded-3xl shadow-2xl p-8 text-center">
+
+    <!-- Check Badge -->
+    <div class="bg-orange-500 w-20 h-20 rounded-full mx-auto flex items-center justify-center shadow-lg animate-pulse">
+      <span class="material-icons text-white text-4xl">check</span>
+    </div>
+
+    <h2 class="text-green-500 font-bold text-2xl mt-4 tracking-tight">Payment Successful</h2>
+
+    <!-- Summary -->
+    <div class="mt-4 text-left bg-gray-100 rounded-2xl p-4 text-sm">
+      <div class="flex justify-between mb-2">
+        <span class="text-gray-600">Order ID</span>
+        <span id="orderId" class="font-semibold text-gray-800">—</span>
+      </div>
+      <div class="flex justify-between mb-2">
+        <span class="text-gray-600">Payment</span>
+        <span id="payMethod" class="font-semibold text-gray-800">—</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-gray-600">Total</span>
+        <span id="paidTotal" class="font-semibold text-gray-800">$0.00</span>
+      </div>
+    </div>
+
+    <p id="successMsg" class="text-gray-600 text-sm mt-3 leading-relaxed">
+      Your order has been placed successfully.
+    </p>
+
+    <button onclick="goTrackNow()"
+      class="bg-gray-800 text-white font-semibold px-6 py-3 rounded-xl shadow-md mt-5 w-full active:scale-95"
+      aria-label="Track your order now">
+      Track Order
+    </button>
+
+    <button onclick="window.location.href='orders.html'"
+      class="border border-orange-500 text-orange-600 font-semibold px-6 py-3 rounded-xl shadow-sm mt-3 w-full active:scale-95"
+      aria-label="View order history">
+      View Order History
+    </button>
+
+  </div>
+</div>
+
+<script>
+/* Screen reader announce */
+function say(msg){
+  document.getElementById("announce").textContent = msg;
+}
+
+/* Keys */
+const ORDERS_KEY = "foodgo_orders";
+
+/* Load last payment summary */
+const last = JSON.parse(localStorage.getItem("lastPayment"));
+
+/* Get latest order from history */
+function getLatestOrder() {
+  try {
+    const orders = JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
+    if (!orders.length) return null;
+    return orders[orders.length - 1]; // latest
+  } catch {
+    return null;
+  }
+}
+
+/* Populate UI */
+function renderSuccessSummary() {
+  const latest = getLatestOrder();
+
+  // Order ID
+  document.getElementById("orderId").textContent = latest?.id || "—";
+
+  // Payment method (prefer latest order record, fallback to lastPayment)
+  let paymentText = "—";
+  if (latest?.payment) {
+    paymentText = latest.payment;
+  } else if (last?.payment != null) {
+    paymentText = (last.payment === 1) ? "Card" : "Cash on Delivery";
+  }
+  document.getElementById("payMethod").textContent = paymentText;
+
+  // Total
+  const totalVal = (last && typeof last.total === "number") ? last.total : (latest?.total || 0);
+  document.getElementById("paidTotal").textContent = `$${Number(totalVal).toFixed(2)}`;
+
+  // Message
+  if (totalVal) {
+    document.getElementById("successMsg").innerHTML =
+      `Your payment of <b>$${Number(totalVal).toFixed(2)}</b> was processed successfully.<br>
+       Your delicious order is now being prepared!`;
+    say("Payment successful. Your order is being prepared.");
+  } else {
+    say("Order successful.");
+  }
+}
+
+renderSuccessSummary();
+
+/* Go to tracking */
+function goTrackNow() {
+  window.location.href = "tracking.html";
+}
+
+/* Auto redirect in 3 seconds */
+setTimeout(goTrackNow, 3000);
+
+/* Confetti */
+function throwConfetti(){
+  const c = document.createElement("div");
+  c.className = "confetti";
+
+  c.style.left = Math.random() * 360 + "px";
+  c.style.backgroundColor = ["#FF3B30","#34C759","#FF9500","#5856D6"][Math.floor(Math.random()*4)];
+  c.style.animationDuration = (1.2 + Math.random()*1) + "s";
+
+  document.querySelector(".iphone").appendChild(c);
+  setTimeout(()=>c.remove(), 2000);
+}
+
+let confettiTimer = setInterval(throwConfetti, 120);
+setTimeout(()=>clearInterval(confettiTimer), 1800);
+
+/* Accessibility toggles */
+const phone = document.querySelector(".iphone");
+const accBtn = document.getElementById("accBtn");
+const accPanel = document.getElementById("accPanel");
+
+accBtn.onclick = () => {
+  const open = accPanel.classList.contains("hidden");
+  accPanel.classList.toggle("hidden", !open);
+  accBtn.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
+document.getElementById("toggleHC").onchange = e => phone.classList.toggle("high-contrast", e.target.checked);
+document.getElementById("toggleLT").onchange = e => phone.classList.toggle("large-text", e.target.checked);
+document.getElementById("toggleDX").onchange = e => phone.classList.toggle("dyslexia-mode", e.target.checked);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Contact Support – FoodGo</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+  .iphone {
+    width: 390px;
+    height: 844px;
+    border-radius: 40px;
+    overflow: hidden;
+    border: 4px solid black;
+    background: #fafafa;
+    position: relative;
+  }
+
+  /* Accessibility */
+  .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+
+  .iphone.high-contrast { background:#000 !important; color:#fff !important; }
+  .iphone.high-contrast * { color:#fff !important; background-color:transparent !important; }
+
+  .iphone.large-text { font-size:1.1rem; }
+  .iphone.large-text * { font-size:inherit; }
+
+  .iphone.dyslexia-mode {
+    font-family: system-ui, sans-serif !important;
+    letter-spacing: 0.03em;
+    line-height: 1.4;
+  }
+
+  body.dark-mode { background:#020617; }
+  body.dark-mode .iphone { background:#020617; color:#e5e7eb; border-color:#111827; }
+  body.dark-mode .bg-white { background:#111827 !important; }
+  body.dark-mode .text-gray-700 { color:#e5e7eb !important; }
+  body.dark-mode .text-gray-500 { color:#9ca3af !important; }
+</style>
+</head>
+
+<body class="bg-gray-900 flex justify-center items-center h-screen">
+
+<div class="iphone" role="application" aria-label="Contact support screen">
+
+  <div id="announce" class="sr-only" aria-live="polite"></div>
+
+  <!-- HEADER -->
+  <header class="absolute top-0 left-0 w-full bg-white/40 backdrop-blur-xl p-5 flex justify-between items-center z-20">
+    <button onclick="history.back()"
+      class="w-10 h-10 bg-white rounded-full shadow flex items-center justify-center"
+      aria-label="Go back">
+      <span class="material-icons">arrow_back</span>
+    </button>
+
+    <h1 class="text-lg font-extrabold tracking-tight">Support</h1>
+
+    <button id="accBtn"
+      class="w-10 h-10 bg-white rounded-full shadow flex items-center justify-center"
+      aria-label="Accessibility options">
+      <span class="material-icons">accessibility_new</span>
+    </button>
+  </header>
+
+  <!-- Accessibility Panel -->
+  <section id="accPanel"
+    class="absolute top-20 right-5 bg-white rounded-xl shadow-xl p-3 text-xs w-56 hidden z-40">
+    <p class="font-semibold mb-2">Accessibility</p>
+
+    <label class="flex items-center gap-2 mb-1">
+      <input type="checkbox" id="toggleHC"> High contrast
+    </label>
+    <label class="flex items-center gap-2 mb-1">
+      <input type="checkbox" id="toggleLT"> Larger text
+    </label>
+    <label class="flex items-center gap-2 mb-1">
+      <input type="checkbox" id="toggleDX"> Dyslexia-friendly
+    </label>
+    <label class="flex items-center gap-2">
+      <input type="checkbox" id="toggleDark"> Dark mode
+    </label>
+  </section>
+
+  <!-- CONTENT -->
+  <main class="pt-24 px-6 pb-6 overflow-y-auto">
+
+    <!-- INFO -->
+    <p class="text-gray-600 text-sm mb-4">
+      Need help? Our support team is here for you 24/7.
+    </p>
+
+    <!-- QUICK CONTACT -->
+   <div class="grid grid-cols-3 gap-3 mb-6">
+
+  <!-- CALL -->
+  <a href="tel:+94771234567"
+     class="bg-green-600 text-white rounded-xl py-3 flex flex-col items-center
+            focus-visible:ring-2 ring-white"
+     aria-label="Call Foodgo support">
+    <span class="material-icons">call</span>
+    <span class="text-xs mt-1">Call</span>
+  </a>
+
+  <!-- WHATSAPP -->
+  <a href="https://wa.me/94771234567"
+     target="_blank" rel="noopener"
+     class="bg-gray-800 text-white rounded-xl py-3 flex flex-col items-center
+            focus-visible:ring-2 ring-white"
+     aria-label="Chat with Foodgo support on WhatsApp">
+    <span class="material-icons">chat</span>
+    <span class="text-xs mt-1">Chat</span>
+  </a>
+
+  <!-- EMAIL -->
+  <a href="mailto:support@foodgo.com?subject=Foodgo%20Support%20Request"
+     class="bg-orange-500 text-white rounded-xl py-3 flex flex-col items-center
+            focus-visible:ring-2 ring-white"
+     aria-label="Email Foodgo support">
+    <span class="material-icons">email</span>
+    <span class="text-xs mt-1">Email</span>
+  </a>
+
+</div>
+
+
+    <!-- CONTACT FORM -->
+    <div class="bg-white rounded-2xl shadow-lg p-5">
+
+      <h2 class="font-bold text-gray-700 mb-4">Send us a message</h2>
+
+      <div class="space-y-4">
+
+        <div>
+          <label class="sr-only" for="name">Name</label>
+          <input id="name" type="text" placeholder="Your Name"
+            class="w-full bg-gray-100 px-4 py-3 rounded-xl outline-none" />
+          <p id="nameErr" class="text-red-500 text-xs mt-1 hidden">Name required</p>
+        </div>
+
+        <div>
+          <label class="sr-only" for="email">Email</label>
+          <input id="email" type="email" placeholder="Email Address"
+            class="w-full bg-gray-100 px-4 py-3 rounded-xl outline-none" />
+          <p id="emailErr" class="text-red-500 text-xs mt-1 hidden">Email required</p>
+        </div>
+
+        <div>
+          <label class="sr-only" for="message">Message</label>
+          <textarea id="message" rows="4" placeholder="Describe your issue"
+            class="w-full bg-gray-100 px-4 py-3 rounded-xl outline-none resize-none"></textarea>
+          <p id="msgErr" class="text-red-500 text-xs mt-1 hidden">Message required</p>
+        </div>
+
+        <button id="sendBtn"
+          class="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold shadow active:scale-95">
+          Send Message
+        </button>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+/* Screen reader announce */
+function say(msg){ document.getElementById("announce").textContent = msg; }
+
+/* Form validation */
+document.getElementById("sendBtn").onclick = () => {
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const message = messageInput.value.trim();
+
+  nameErr.classList.add("hidden");
+  emailErr.classList.add("hidden");
+  msgErr.classList.add("hidden");
+
+  let ok = true;
+  if (!name) { nameErr.classList.remove("hidden"); ok = false; }
+  if (!email) { emailErr.classList.remove("hidden"); ok = false; }
+  if (!message) { msgErr.classList.remove("hidden"); ok = false; }
+
+  if (!ok) {
+    alert("Please fill all fields");
+    say("Form submission failed. Missing fields.");
+    return;
+  }
+
+  alert("Support message sent successfully!");
+  say("Your support request has been sent.");
+
+  nameInput.value = "";
+  emailInput.value = "";
+  messageInput.value = "";
+};
+
+/* Accessibility toggles */
+const phone = document.querySelector(".iphone");
+const body = document.body;
+
+accBtn.onclick = () => accPanel.classList.toggle("hidden");
+
+toggleHC.onchange = e => phone.classList.toggle("high-contrast", e.target.checked);
+toggleLT.onchange = e => phone.classList.toggle("large-text", e.target.checked);
+toggleDX.onchange = e => phone.classList.toggle("dyslexia-mode", e.target.checked);
+toggleDark.onchange = e => body.classList.toggle("dark-mode", e.target.checked);
+
+/* Element refs */
+const nameInput = document.getElementById("name");
+const emailInput = document.getElementById("email");
+const messageInput = document.getElementById("message");
+const nameErr = document.getElementById("nameErr");
+const emailErr = document.getElementById("emailErr");
+const msgErr = document.getElementById("msgErr");
+const accBtn = document.getElementById("accBtn");
+const accPanel = document.getElementById("accPanel");
+</script>
+
+</body>
+</html>

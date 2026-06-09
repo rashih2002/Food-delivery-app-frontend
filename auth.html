@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>FoodGo – Login / Sign Up</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+  .iphone {
+    width: 390px;
+    height: 844px;
+    border-radius: 40px;
+    overflow: hidden;
+    border: 3px solid black;
+    position: relative;
+    background: #fafafa;
+  }
+
+  /* Accessibility modes */
+  .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+
+  .iphone.high-contrast { background:#000 !important; color:#fff !important; }
+  .iphone.high-contrast input { background:#333 !important; color:#fff !important; }
+
+  .iphone.large-text { font-size:1.1rem; }
+  .iphone.large-text * { font-size:inherit; }
+
+  .iphone.dyslexia-mode { font-family:system-ui,sans-serif !important; letter-spacing:0.03em; line-height:1.4; }
+
+  /* Tab underline animation */
+  .tab-active {
+    border-bottom-width: 3px;
+    border-color: #090433;
+    color: #0d0236 !important;
+  }
+</style>
+</head>
+
+<body class="bg-gray-200 flex justify-center items-center h-screen">
+
+<div class="iphone">
+
+  <!-- Background image -->
+  <img src="images/home.jpg"
+       class="absolute inset-0 w-full h-full object-cover opacity-40">
+
+  <div class="absolute inset-0 bg-black/40"></div>
+
+  <!-- Accessibility Button -->
+  <button id="accBtn"
+    class="absolute top-5 right-5 z-30 w-10 h-10 rounded-full bg-white shadow flex items-center justify-center"
+    aria-label="Accessibility settings"
+  >
+    <span class="material-icons text-gray-700">accessibility_new</span>
+  </button>
+
+  <!-- Accessibility Panel -->
+  <section id="accPanel"
+    class="absolute top-20 right-5 bg-white rounded-xl shadow-xl p-3 text-xs w-52 hidden z-40">
+    <p class="font-semibold mb-2">Accessibility</p>
+
+    <label class="flex items-center gap-2 mb-1"><input type="checkbox" id="toggleHC"> High contrast</label>
+    <label class="flex items-center gap-2 mb-1"><input type="checkbox" id="toggleLT"> Larger text</label>
+    <label class="flex items-center gap-2"><input type="checkbox" id="toggleDX"> Dyslexia-friendly</label>
+  </section>
+
+  <!-- AUTH CARD -->
+  <div class="absolute bottom-0 w-full bg-white rounded-t-[32px] p-6 shadow-xl z-20">
+
+    <!-- TABS -->
+    <div class="flex justify-center gap-10 mb-6">
+      <button id="loginTab" class="font-semibold text-gray-400 pb-1 tab-active">
+        Login
+      </button>
+
+      <button id="registerTab" class="font-semibold text-gray-400 pb-1">
+        Sign Up
+      </button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="space-y-4">
+
+        <div>
+          <input id="loginEmail" type="email" placeholder="Email"
+                 class="w-full bg-gray-100 px-4 py-3 rounded-xl outline-none" />
+          <p id="loginEmailErr" class="text-red-500 text-xs mt-1 hidden">Email required</p>
+        </div>
+
+        <div>
+          <input id="loginPassword" type="password" placeholder="Password"
+                 class="w-full bg-gray-100 px-4 py-3 rounded-xl outline-none" />
+          <p id="loginPassErr" class="text-red-500 text-xs mt-1 hidden">Password required</p>
+        </div>
+
+        <button id="loginBtn"
+                class="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold shadow active:scale-95">
+          Login
+        </button>
+      </div>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="registerForm" class="hidden">
+      <div class="space-y-4">
+
+        <div>
+          <input id="regName" type="text" placeholder="Full Name"
+                 class="w-full bg-gray-100 px-4 py-3 rounded-xl outline-none" />
+          <p id="regNameErr" class="text-red-500 text-xs mt-1 hidden">Name required</p>
+        </div>
+
+        <div>
+          <input id="regEmail" type="email" placeholder="Email"
+                 class="w-full bg-gray-100 px-4 py-3 rounded-xl outline-none" />
+          <p id="regEmailErr" class="text-red-500 text-xs mt-1 hidden">Email required</p>
+        </div>
+
+        <div>
+          <input id="regAddress" type="text" placeholder="Delivery Address"
+                 class="w-full bg-gray-100 px-4 py-3 rounded-xl outline-none" />
+          <p id="regAddressErr" class="text-red-500 text-xs mt-1 hidden">Address required</p>
+        </div>
+
+        <div>
+          <input id="regPassword" type="password" placeholder="Password"
+                 class="w-full bg-gray-100 px-4 py-3 rounded-xl outline-none" />
+          <p id="regPassErr" class="text-red-500 text-xs mt-1 hidden">Password required</p>
+        </div>
+
+        <button id="signupBtn"
+                class="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold shadow active:scale-95">
+          Create Account
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* 
+     TAB SWITCHING
+*/
+const loginTab = document.getElementById("loginTab");
+const registerTab = document.getElementById("registerTab");
+
+const loginForm = document.getElementById("loginForm");
+const registerForm = document.getElementById("registerForm");
+
+function switchToLogin() {
+  loginForm.classList.remove("hidden");
+  registerForm.classList.add("hidden");
+
+  loginTab.classList.add("tab-active");
+  registerTab.classList.remove("tab-active");
+}
+
+function switchToRegister() {
+  loginForm.classList.add("hidden");
+  registerForm.classList.remove("hidden");
+
+  registerTab.classList.add("tab-active");
+  loginTab.classList.remove("tab-active");
+}
+
+loginTab.onclick = switchToLogin;
+registerTab.onclick = switchToRegister;
+
+/* 
+     KEYBOARD LEFT/RIGHT TAB SWITCH
+*/
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight") switchToRegister();
+  if (e.key === "ArrowLeft") switchToLogin();
+});
+
+/* 
+     SIGNUP VALIDATION
+
+     */
+document.getElementById("signupBtn").onclick = () => {
+  const name = regName.value.trim();
+  const email = regEmail.value.trim();
+  const address = regAddress.value.trim();
+  const password = regPassword.value.trim();
+
+  // reset errors
+  document.querySelectorAll("#registerForm p").forEach(p => p.classList.add("hidden"));
+
+  let ok = true;
+  if (!name) { regNameErr.classList.remove("hidden"); ok = false; }
+  if (!email) { regEmailErr.classList.remove("hidden"); ok = false; }
+  if (!address) { regAddressErr.classList.remove("hidden"); ok = false; }
+  if (!password) { regPassErr.classList.remove("hidden"); ok = false; }
+
+  if (!ok) return;
+
+  const user = { name, email, address, password };
+  localStorage.setItem("foodgoUser", JSON.stringify(user));
+
+  alert("Account created! Please login.");
+  switchToLogin();
+};
+
+/* 
+     LOGIN VALIDATION
+*/
+document.getElementById("loginBtn").onclick = () => {
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value.trim();
+  const user = JSON.parse(localStorage.getItem("foodgoUser"));
+
+  loginEmailErr.classList.add("hidden");
+  loginPassErr.classList.add("hidden");
+
+  if (!email) loginEmailErr.classList.remove("hidden");
+  if (!password) loginPassErr.classList.remove("hidden");
+  if (!email || !password) return;
+
+  if (!user) {
+    alert("No account found. Please sign up.");
+    return;
+  }
+
+  if (user.email === email && user.password === password) {
+    alert("Login successful!");
+    localStorage.setItem("foodgoLoggedIn", "yes");
+    localStorage.setItem("showTodayOffer", "true");
+    window.location.href = "index.html";
+
+  } else {
+    alert("Incorrect email or password.");
+  }
+};
+
+/* 
+     ACCESSIBILITY PANEL
+*/
+const accBtn = document.getElementById("accBtn");
+const accPanel = document.getElementById("accPanel");
+const phone = document.querySelector(".iphone");
+
+accBtn.onclick = () => {
+  accPanel.classList.toggle("hidden");
+};
+
+document.getElementById("toggleHC").onchange = e =>
+  phone.classList.toggle("high-contrast", e.target.checked);
+
+document.getElementById("toggleLT").onchange = e =>
+  phone.classList.toggle("large-text", e.target.checked);
+
+document.getElementById("toggleDX").onchange = e =>
+  phone.classList.toggle("dyslexia-mode", e.target.checked);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>FoodGo – Cart</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    .iphone {
+      width: 390px;
+      height: 844px;
+      border-radius: 40px;
+      border: 2px solid #000;
+      background: #fafafa;
+      margin: auto;
+      margin-top: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .sr-only {
+      position: absolute !important;
+      width: 1px; height: 1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+    }
+
+    /* Accessibility modes */
+    .iphone.high-contrast { background:#000 !important; color:#fff !important; }
+    .iphone.high-contrast * { color:#fff !important; background-color:transparent !important; }
+
+    .iphone.large-text { font-size:1.08rem; }
+    .iphone.large-text * { font-size:inherit; }
+
+    .iphone.dyslexia-mode {
+      font-family:system-ui,sans-serif !important;
+      letter-spacing:0.03em;
+      line-height:1.4;
+    }
+
+    .qty-btn { transition:transform .2s ease; }
+    .qty-btn:active { transform:scale(.9); }
+  </style>
+</head>
+
+<body class="bg-gray-900 flex justify-center items-center h-screen">
+
+<div class="iphone" role="application" aria-label="Shopping cart screen">
+
+  <!-- Screen reader live region -->
+  <div id="statusRegion" class="sr-only" aria-live="polite"></div>
+
+  <!-- HEADER -->
+  <header class="w-full absolute top-0 left-0 z-20 bg-white/40 backdrop-blur-xl p-5 flex justify-between items-center">
+    <button onclick="history.back()"
+            class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center focus-visible:ring-2 ring-red-500"
+            aria-label="Go back">
+      <span class="material-icons text-gray-700">arrow_back</span>
+    </button>
+
+    <h1 class="text-xl font-extrabold tracking-tight">Your Cart</h1>
+
+    <button id="accToggle"
+            class="w-10 h-10 rounded-full bg-white shadow flex items-center justify-center focus-visible:ring-2 ring-red-500"
+            aria-label="Accessibility options" aria-expanded="false">
+      <span class="material-icons text-gray-700">accessibility_new</span>
+    </button>
+  </header>
+
+  <!-- Accessibility Panel -->
+  <section id="accPanel"
+           class="absolute top-20 right-5 bg-white w-48 shadow-xl rounded-xl p-3 text-xs hidden z-30"
+           aria-label="Accessibility settings">
+    <p class="font-semibold text-gray-700 mb-1">Accessibility</p>
+    <label class="flex items-center gap-2 cursor-pointer mb-1">
+      <input type="checkbox" id="toggleHC"> High contrast
+    </label>
+    <label class="flex items-center gap-2 cursor-pointer mb-1">
+      <input type="checkbox" id="toggleLT"> Larger text
+    </label>
+    <label class="flex items-center gap-2 cursor-pointer">
+      <input type="checkbox" id="toggleDX"> Dyslexia-friendly
+    </label>
+  </section>
+
+  <!-- CART LIST -->
+  <main id="cartList"
+        class="px-5 pt-24 pb-40 overflow-y-auto space-y-5"
+        aria-label="Cart item list">
+    <!-- JS will inject items here -->
+  </main>
+
+  <!-- FOOTER TOTALS + BUTTONS -->
+  <footer class="absolute bottom-0 left-0 right-0 bg-white/85 backdrop-blur-xl shadow-xl px-6 py-5 rounded-b-[40px]">
+
+    <div class="flex justify-between mb-1 text-sm">
+      <span class="text-gray-600">Subtotal</span>
+      <span id="subTotal" class="font-semibold">$0.00</span>
+    </div>
+
+    <div class="flex justify-between mb-3 text-sm">
+      <span class="text-gray-600">Delivery Fee</span>
+      <span class="font-semibold">$2.00</span>
+    </div>
+
+    <div class="flex justify-between text-lg font-bold mb-4">
+      <span>Total</span>
+      <span id="totalAmount">$0.00</span>
+    </div>
+
+    <div class="flex gap-3">
+      <!-- Delete selected -->
+      <button id="deleteSelectedBtn"
+              class="flex-1 bg-red-500 text-white py-2 rounded-xl text-xs font-semibold shadow
+                     disabled:opacity-100 disabled:cursor-not-allowed"
+              aria-label="Delete selected items from cart"
+              disabled>
+        Delete Selected
+      </button>
+
+      <!-- Checkout -->
+      <button id="checkoutBtn"
+              class="flex-[2] bg-gray-800 text-white py-3 rounded-xl font-semibold shadow-lg
+                     focus-visible:ring-2 ring-white active:scale-95"
+              aria-label="Proceed to checkout">
+        Checkout
+      </button>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* Helper to announce to screen readers */
+function announce(msg) {
+  document.getElementById("statusRegion").textContent = msg;
+}
+
+/* Safely get cart array */
+function getCart() {
+  try {
+    return JSON.parse(localStorage.getItem("cart") || "[]");
+  } catch {
+    localStorage.removeItem("cart");
+    return [];
+  }
+}
+
+/* Save cart array */
+function saveCart(cart) {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+/* RENDER CART ITEMS */
+function loadCart() {
+  const cart = getCart();
+  const cartList = document.getElementById("cartList");
+  const deleteBtn = document.getElementById("deleteSelectedBtn");
+
+  cartList.innerHTML = "";
+
+  if (cart.length === 0) {
+    cartList.innerHTML = `<p class="text-center text-gray-500 mt-10">Your cart is empty.</p>`;
+    deleteBtn.disabled = true;
+    updateTotals();
+    announce("Your cart is empty");
+    return;
+  }
+
+  // Render each item
+  cart.forEach(item => {
+    const idStr = String(item.id);
+
+    cartList.innerHTML += `
+      <article class="flex items-center justify-between bg-white shadow-md rounded-2xl p-4 gap-3"
+               aria-label="${item.name}, quantity ${item.qty}">
+
+        <div class="flex items-center gap-3">
+          <!-- selection checkbox -->
+          <input type="checkbox"
+                 class="select-item w-4 h-4 accent-red-500"
+                 aria-label="Select ${item.name} for deletion"
+                 value="${idStr}">
+
+          <img src="${item.img}" alt="${item.name}" class="w-16 h-16 rounded-xl object-cover shadow">
+
+          <div>
+            <h3 class="text-sm font-semibold">${item.name}</h3>
+            <p class="text-xs text-gray-500">$${Number(item.price).toFixed(2)}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button class="qty-btn bg-orange-600 text-white w-8 h-8 rounded-lg shadow flex items-center justify-center"
+                  aria-label="Decrease quantity of ${item.name}"
+                  onclick="updateQty('${idStr}', -1)">
+            –
+          </button>
+
+          <span class="w-6 text-center font-bold" aria-live="polite">${item.qty}</span>
+
+          <button class="qty-btn bg-orange-600 text-white w-8 h-8 rounded-lg shadow flex items-center justify-center"
+                  aria-label="Increase quantity of ${item.name}"
+                  onclick="updateQty('${idStr}', 1)">
+            +
+          </button>
+        </div>
+
+      </article>
+    `;
+  });
+
+  // After rendering, wire selection logic
+  attachSelectionListeners();
+  updateTotals();
+}
+
+/* UPDATE QUANTITY (id is string) */
+function updateQty(id, delta) {
+  let cart = getCart();
+  const idStr = String(id);
+
+  const item = cart.find(i => String(i.id) === idStr);
+  if (!item) return;
+
+  item.qty = Number(item.qty) + delta;
+
+  if (item.qty <= 0) {
+    cart = cart.filter(i => String(i.id) !== idStr);
+    announce(item.name + " removed from cart");
+  } else {
+    announce(item.name + " quantity updated to " + item.qty);
+  }
+
+  saveCart(cart);
+  loadCart(); // re-render UI + totals
+}
+
+/* ENABLE/DISABLE DELETE BUTTON BASED ON SELECTION */
+function attachSelectionListeners() {
+  const checkboxes = document.querySelectorAll(".select-item");
+  const deleteBtn = document.getElementById("deleteSelectedBtn");
+
+  function refreshDeleteBtnState() {
+    const anySelected = Array.from(checkboxes).some(cb => cb.checked);
+    deleteBtn.disabled = !anySelected;
+  }
+
+  checkboxes.forEach(cb => cb.addEventListener("change", refreshDeleteBtnState));
+  refreshDeleteBtnState();
+}
+
+/* DELETE SELECTED ITEMS */
+document.getElementById("deleteSelectedBtn").addEventListener("click", () => {
+  let cart = getCart();
+  const selected = Array.from(document.querySelectorAll(".select-item:checked"))
+    .map(cb => cb.value); // string ids
+
+  if (selected.length === 0) {
+    announce("No items selected to delete");
+    return;
+  }
+
+  cart = cart.filter(item => !selected.includes(String(item.id)));
+  saveCart(cart);
+
+  announce(`Deleted ${selected.length} item${selected.length > 1 ? "s" : ""} from cart`);
+  loadCart();
+});
+
+/* TOTALS CALCULATION */
+function updateTotals() {
+  const cart = getCart();
+  let subtotal = 0;
+
+  cart.forEach(item => {
+    subtotal += Number(item.price) * Number(item.qty);
+  });
+
+  const subEl = document.getElementById("subTotal");
+  const totalEl = document.getElementById("totalAmount");
+
+  subEl.textContent = "$" + subtotal.toFixed(2);
+
+  const total = subtotal + 2.0; // fixed delivery fee
+  totalEl.textContent = "$" + total.toFixed(2);
+}
+
+/* CHECKOUT HANDLER */
+document.getElementById("checkoutBtn").addEventListener("click", () => {
+  const cart = getCart();
+
+  if (cart.length === 0) {
+    alert("Your cart is empty.");
+    announce("Cannot proceed to checkout. Cart is empty.");
+    return;
+  }
+
+  announce("Proceeding to checkout");
+  window.location.href = "checkout.html";
+});
+
+/* ACCESSIBILITY PANEL */
+const iphone = document.querySelector(".iphone");
+const accToggle = document.getElementById("accToggle");
+const accPanel = document.getElementById("accPanel");
+
+accToggle.addEventListener("click", () => {
+  const willOpen = accPanel.classList.contains("hidden");
+  accPanel.classList.toggle("hidden", !willOpen);
+  accToggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+});
+
+document.getElementById("toggleHC").addEventListener("change", (e) => {
+  iphone.classList.toggle("high-contrast", e.target.checked);
+});
+document.getElementById("toggleLT").addEventListener("change", (e) => {
+  iphone.classList.toggle("large-text", e.target.checked);
+});
+document.getElementById("toggleDX").addEventListener("change", (e) => {
+  iphone.classList.toggle("dyslexia-mode", e.target.checked);
+});
+
+/* INIT */
+loadCart();
+</script>
+
+</body>
+</html>

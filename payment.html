@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Details - FoodGo</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<style>
+  .iphone {
+    width: 390px;
+    height: 844px;
+    border-radius: 40px;
+    overflow: hidden;
+    border: 2px solid black;
+  }
+</style>
+</head>
+
+<body class="bg-gray-200 flex justify-center items-center h-screen">
+
+<div class="iphone bg-white relative">
+
+  <!-- HEADER -->
+  <div class="bg-gray-700 h-28 flex items-center justify-between px-5">
+    <button onclick="history.back()"
+            class="bg-white w-10 h-10 rounded-full shadow flex items-center justify-center">
+      <span class="material-icons text-gray-700">arrow_back</span>
+    </button>
+
+    <h2 class="text-white text-lg font-semibold">Payment Details</h2>
+    <div class="w-10"></div>
+  </div>
+
+  <div class="px-6 pt-6 space-y-6">
+
+    <!-- SAVED CARD AREA -->
+    <div id="savedCardBox" class="hidden bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-2xl p-5 shadow-lg">
+      <p class="text-sm opacity-80">Saved Card</p>
+      <p id="savedCardNumber" class="text-lg tracking-widest mt-2">**** **** **** 0000</p>
+
+      <div class="flex justify-between items-center mt-4 text-sm">
+        <span id="savedExpiry">Expiry: 00/00</span>
+        <span class="flex items-center gap-1">
+          <span class="material-icons text-base">credit_card</span> <span id="savedBrand">CARD</span>
+        </span>
+      </div>
+
+      <button onclick="removeCard()"
+              class="mt-4 w-full bg-white text-orange-600 py-2 rounded-xl text-sm font-semibold">
+        Remove Card
+      </button>
+    </div>
+
+    <!-- ADD CARD -->
+    <div class="space-y-4">
+      <h3 class="text-gray-800 font-semibold text-sm">Add / Update Card</h3>
+
+      <input id="holder" type="text" placeholder="Card Holder Name"
+             class="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none">
+
+      <input id="cardNo" type="text" placeholder="Card Number (16 digits)"
+             class="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none">
+
+      <div class="flex gap-3">
+        <input id="expiry" type="text" placeholder="MM/YY"
+               class="w-1/2 bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none">
+
+        <input id="cvv" type="password" placeholder="CVV"
+               class="w-1/2 bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none">
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVE BUTTON -->
+  <div class="absolute bottom-10 w-full px-6">
+    <button onclick="saveCard()"
+            class="w-full bg-gray-700 text-white py-4 rounded-xl text-sm font-semibold active:scale-95">
+      Save Payment Method
+    </button>
+  </div>
+
+</div>
+
+<script>
+  const PAY_KEY = "foodgo_payment";
+
+  function maskCard(cardNo) {
+    const last4 = cardNo.slice(-4);
+    return "**** **** **** " + last4;
+  }
+
+  function getBrand(cardNo) {
+    // simple demo logic
+    if (cardNo.startsWith("4")) return "VISA";
+    if (cardNo.startsWith("5")) return "MASTERCARD";
+    if (cardNo.startsWith("3")) return "AMEX";
+    return "CARD";
+  }
+
+  function loadCard() {
+    const saved = localStorage.getItem(PAY_KEY);
+    if (!saved) return;
+
+    const data = JSON.parse(saved);
+    document.getElementById("savedCardBox").classList.remove("hidden");
+    document.getElementById("savedCardNumber").textContent = maskCard(data.cardNo);
+    document.getElementById("savedExpiry").textContent = "Expiry: " + data.expiry;
+    document.getElementById("savedBrand").textContent = getBrand(data.cardNo);
+
+    // Prefill inputs
+    document.getElementById("holder").value = data.holder;
+    document.getElementById("cardNo").value = data.cardNo;
+    document.getElementById("expiry").value = data.expiry;
+  }
+
+  function saveCard() {
+    const holder = document.getElementById("holder").value.trim();
+    const cardNoRaw = document.getElementById("cardNo").value.replace(/\s+/g, "");
+    const expiry = document.getElementById("expiry").value.trim();
+    const cvv = document.getElementById("cvv").value.trim();
+
+    if (!holder || !cardNoRaw || !expiry || !cvv) {
+      alert("Please fill all fields.");
+      return;
+    }
+
+    if (!/^\d{16}$/.test(cardNoRaw)) {
+      alert("Card number must be 16 digits.");
+      return;
+    }
+
+    if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+      alert("Expiry must be in MM/YY format.");
+      return;
+    }
+
+    if (!/^\d{3}$/.test(cvv)) {
+      alert("CVV must be 3 digits.");
+      return;
+    }
+
+    localStorage.setItem(PAY_KEY, JSON.stringify({
+      holder,
+      cardNo: cardNoRaw,
+      expiry
+    }));
+
+    alert("Payment method saved!");
+    document.getElementById("cvv").value = "";
+    loadCard();
+  }
+
+  function removeCard() {
+    localStorage.removeItem(PAY_KEY);
+    document.getElementById("savedCardBox").classList.add("hidden");
+    alert("Saved card removed!");
+  }
+
+  loadCard();
+</script>
+
+</body>
+</html>

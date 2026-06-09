@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>FoodGo – Start</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+  <style>
+    .iphone {
+      width: 390px;
+      height: 844px;
+      border-radius: 40px;
+      overflow: hidden;
+      border: 3px solid black;
+      position: relative;
+      background: #fafafa;
+    }
+
+    /* Accessibility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+    }
+
+    .iphone.high-contrast {
+      background: #000 !important;
+      color: #fff !important;
+    }
+
+    .iphone.large-text {
+      font-size: 1.14rem;
+    }
+
+    .iphone.large-text * {
+      font-size: inherit;
+    }
+
+    .iphone.dyslexia-mode {
+      font-family: system-ui, sans-serif !important;
+      letter-spacing: 0.03em;
+      line-height: 1.4;
+    }
+
+    /* Button hover + press effect */
+    .btn-main:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+
+<body class="bg-gray-900 flex justify-center items-center h-screen">
+
+  <!-- PHONE FRAME -->
+  <div class="iphone relative bg-cover bg-center"
+    style="background-image: url('images/home.jpg');">
+
+    <!-- Dark overlay -->
+    <div class="absolute inset-0 bg-black/50"></div>
+
+    <!-- Accessibility Button -->
+    <button id="accBtn"
+      class="absolute top-5 right-5 z-30 w-10 h-10 rounded-full bg-white shadow flex items-center justify-center"
+      aria-label="Accessibility settings">
+      <span class="material-icons text-gray-700">accessibility_new</span>
+    </button>
+
+    <!-- Accessibility Panel -->
+    <section id="accPanel"
+      class="absolute top-20 right-5 bg-white rounded-xl shadow-xl p-3 text-xs w-56 hidden z-40">
+      <p class="font-semibold mb-2">Accessibility & Display</p>
+
+      <label class="flex items-center gap-2 mb-1">
+        <input type="checkbox" id="toggleHC"> High contrast
+      </label>
+
+      <label class="flex items-center gap-2 mb-1">
+        <input type="checkbox" id="toggleLT"> Larger text
+      </label>
+
+      <label class="flex items-center gap-2 mb-2">
+        <input type="checkbox" id="toggleDX"> Dyslexia-friendly
+      </label>
+    </section>
+
+    <!-- LOGO TEXT -->
+    <div id="logoText" class="absolute top-28 w-full text-center opacity-0 translate-y-4">
+      <h1 class="text-white font-extrabold text-[46px] leading-[42px] tracking-[3px] drop-shadow-xl">
+        FOODGO
+      </h1>
+      <p class="text-orange-500 font-semibold tracking-wide mt-2">FAST DELIVERY</p>
+    </div>
+
+    <!-- BUTTON AREA -->
+    <div id="btnArea" class="absolute bottom-24 w-full text-center opacity-0 translate-y-6">
+
+      <!-- Get Started -->
+      <button id="btnStart"
+        class="btn-main bg-orange-500 text-white font-bold text-xl px-20 py-5 rounded-3xl shadow-lg transition-transform duration-200">
+        Get Started
+      </button>
+
+      <!-- Login / Signup -->
+      <p class="text-white text-sm mt-4 tracking-wide">
+        Already a user?
+        <a href="auth.html" class="text-orange-500 underline">Login / Sign Up</a>
+      </p>
+    </div>
+
+  </div>
+
+  <script>
+    /* 
+         Intro Animations
+    */
+    document.addEventListener("DOMContentLoaded", () => {
+      const logo = document.getElementById("logoText");
+      const btnArea = document.getElementById("btnArea");
+      const btnStart = document.getElementById("btnStart");
+
+      setTimeout(() => {
+        logo.style.transition = "all 0.8s ease-out";
+        logo.style.opacity = "1";
+        logo.style.transform = "translateY(0)";
+      }, 200);
+
+      setTimeout(() => {
+        btnArea.style.transition = "all 0.8s ease-out";
+        btnArea.style.opacity = "1";
+        btnArea.style.transform = "translateY(0)";
+      }, 350);
+
+      btnStart.onclick = () => {
+        btnStart.disabled = true;
+        btnStart.classList.add("scale-95");
+
+        setTimeout(() => {
+          window.location.href = "auth.html";
+        }, 180);
+      };
+    });
+
+    /* 
+        Accessibility Panel
+     */
+    const accBtn = document.getElementById("accBtn");
+    const accPanel = document.getElementById("accPanel");
+    const phone = document.querySelector(".iphone");
+
+    accBtn.onclick = () => {
+      accPanel.classList.toggle("hidden");
+    };
+
+    document.getElementById("toggleHC").onchange = (e) =>
+      phone.classList.toggle("high-contrast", e.target.checked);
+
+    document.getElementById("toggleLT").onchange = (e) =>
+      phone.classList.toggle("large-text", e.target.checked);
+
+    document.getElementById("toggleDX").onchange = (e) =>
+      phone.classList.toggle("dyslexia-mode", e.target.checked);
+
+  </script>
+
+</body>
+
+</html>
